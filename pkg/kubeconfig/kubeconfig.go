@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"text/tabwriter"
 
 	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
 
@@ -15,9 +16,14 @@ import (
 const kubeconfigEnvVar = "KUBECONFIG"
 const defaultKubeconfig = "/.kube/config"
 
-func GetDefaultKubeconfigPath(kubeconfigPath string) (string, error) {
-	if len(kubeconfigPath) > 0 {
-		return kubeconfigPath, nil
+type ContextWithEndpoint struct {
+	Name     string
+	Endpoint string
+}
+
+func getKubeconfigPath(kubeconfigArg string) (string, error) {
+	if len(kubeconfigArg) > 0 {
+		return kubeconfigArg, nil
 	}
 
 	envVarValue := os.Getenv(kubeconfigEnvVar)
@@ -34,13 +40,8 @@ func GetDefaultKubeconfigPath(kubeconfigPath string) (string, error) {
 	return path.Join(home, defaultKubeconfig), nil
 }
 
-type ContextWithEndpoint struct {
-	Name     string
-	Endpoint string
-}
-
-func GetContextsWithEndpoint(kubeconfigPath string) ([]*ContextWithEndpoint, error) {
-	clustersConfig, err := ReadDefaultKubeconfig(kubeconfigPath)
+func getContextsWithEndpoint(kubeconfigPath string) ([]*ContextWithEndpoint, error) {
+	currentConfig, err := getClustersConfig(kubeconfigPath)
 
 	if err != nil {
 		return nil, err
@@ -48,12 +49,12 @@ func GetContextsWithEndpoint(kubeconfigPath string) ([]*ContextWithEndpoint, err
 
 	mapClusterContext := map[string]string{}
 
-	for _, v := range clustersConfig.Contexts {
+	for _, v := range currentConfig.Contexts {
 		mapClusterContext[v.Context.Cluster] = v.Name
 	}
 
 	listContexts := []*ContextWithEndpoint{}
-	for _, v := range clustersConfig.Clusters {
+	for _, v := range currentConfig.Clusters {
 		if ctx, ok := mapClusterContext[v.Name]; ok {
 			ctxWithEndpoint := &ContextWithEndpoint{
 				Endpoint: v.Cluster.Server,
@@ -66,16 +67,7 @@ func GetContextsWithEndpoint(kubeconfigPath string) ([]*ContextWithEndpoint, err
 	return listContexts, nil
 }
 
-func ReadDefaultKubeconfig(kubeconfigPath string) (*v1.Config, error) {
-	configPath, err := GetDefaultKubeconfigPath(kubeconfigPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return ReadKubeconfig(configPath)
-}
-
-func ReadKubeconfig(kubeconfigPath string) (*v1.Config, error) {
+func getClustersConfig(kubeconfigPath string) (*v1.Config, error) {
 	fileContent, err := ioutil.ReadFile(kubeconfigPath)
 
 	if err != nil {
@@ -92,18 +84,18 @@ func ReadKubeconfig(kubeconfigPath string) (*v1.Config, error) {
 	return clustersConfig, nil
 }
 
-func AddClusters(kubeconfigPath, newClustersPath string) error {
-	currentKubeconfigPath, err := GetDefaultKubeconfigPath(kubeconfigPath)
+func AddContext(kubeconfigArg, newKubeconfigPath string) error {
+	kubeconfigPath, err := getKubeconfigPath(kubeconfigArg)
 	if err != nil {
 		return err
 	}
 
-	currentConfig, err := ReadKubeconfig(currentKubeconfigPath)
+	currentConfig, err := getClustersConfig(kubeconfigPath)
 	if err != nil {
 		return err
 	}
 
-	toAddConfig, err := ReadKubeconfig(newClustersPath)
+	toAddConfig, err := getClustersConfig(newKubeconfigPath)
 	if err != nil {
 		return err
 	}
@@ -128,25 +120,29 @@ func AddClusters(kubeconfigPath, newClustersPath string) error {
 	currentConfig.AuthInfos = users
 	currentConfig.Contexts = contexts
 
-	bytes, err := yaml.Marshal(currentConfig)
+	return saveConfig(currentConfig, kubeconfigPath)
+}
+
+func saveConfig(config *v1.Config, kubeconfigPath string) error {
+	bytes, err := yaml.Marshal(config)
 	if err != nil {
 		return fmt.Errorf("Error while Marshaling result, error was: %s", err)
 	}
 
-	if err = ioutil.WriteFile(currentKubeconfigPath, bytes, 0644); err != nil {
-		return fmt.Errorf("Error while saving file %s, error was: %s", currentKubeconfigPath, err)
+	if err = ioutil.WriteFile(kubeconfigPath, bytes, 0644); err != nil {
+		return fmt.Errorf("Error while saving file %s, error was: %s", kubeconfigPath, err)
 	}
 
 	return nil
 }
 
-func RenameContext(kubeconfigPath, contextName, newName string) error {
-	currentKubeconfigPath, err := GetDefaultKubeconfigPath(kubeconfigPath)
+func RenameContext(kubeconfigArg, contextName, newName string) error {
+	kubeconfigPath, err := getKubeconfigPath(kubeconfigArg)
 	if err != nil {
 		return err
 	}
 
-	currentConfig, err := ReadKubeconfig(currentKubeconfigPath)
+	currentConfig, err := getClustersConfig(kubeconfigPath)
 	if err != nil {
 		return err
 	}
@@ -173,26 +169,16 @@ func RenameContext(kubeconfigPath, contextName, newName string) error {
 		currentConfig.CurrentContext = newName
 	}
 
-	bytes, err := yaml.Marshal(currentConfig)
-	if err != nil {
-		return fmt.Errorf("Error while Marshaling result, error was: %s", err)
-	}
-
-	if err = ioutil.WriteFile(currentKubeconfigPath, bytes, 0644); err != nil {
-		return fmt.Errorf("Error while saving file %s, error was: %s", currentKubeconfigPath, err)
-	}
-
-	return nil
-
+	return saveConfig(currentConfig, kubeconfigPath)
 }
 
-func DeleteContext(kubeconfigPath, contextName string) error {
-	currentKubeconfigPath, err := GetDefaultKubeconfigPath(kubeconfigPath)
+func DeleteContext(kubeconfigArg, contextName string) error {
+	kubeconfigPath, err := getKubeconfigPath(kubeconfigArg)
 	if err != nil {
 		return err
 	}
 
-	currentConfig, err := ReadKubeconfig(currentKubeconfigPath)
+	currentConfig, err := getClustersConfig(kubeconfigPath)
 	if err != nil {
 		return err
 	}
@@ -218,16 +204,7 @@ func DeleteContext(kubeconfigPath, contextName string) error {
 		currentConfig.CurrentContext = ""
 	}
 
-	bytes, err := yaml.Marshal(currentConfig)
-	if err != nil {
-		return fmt.Errorf("Error while Marshaling result, error was: %s", err)
-	}
-
-	if err = ioutil.WriteFile(currentKubeconfigPath, bytes, 0644); err != nil {
-		return fmt.Errorf("Error while saving file %s, error was: %s", currentKubeconfigPath, err)
-	}
-
-	return nil
+	return saveConfig(currentConfig, kubeconfigPath)
 }
 
 func splitClusters(config *v1.Config) map[string]*v1.Config {
@@ -260,4 +237,39 @@ func splitClusters(config *v1.Config) map[string]*v1.Config {
 	}
 
 	return mapConfigs
+}
+
+func ListContexts(kubeconfigArg string) error {
+	configPath, err := getKubeconfigPath(kubeconfigArg)
+	if err != nil {
+		return err
+	}
+
+	contexts, err := getContextsWithEndpoint(configPath)
+	if err != nil {
+		return err
+	}
+
+	printContexts(contexts)
+
+	return nil
+}
+
+func printContexts(contexts []*ContextWithEndpoint) {
+	if len(contexts) == 0 {
+		fmt.Println("No contexts found.")
+		return
+	}
+
+	w := new(tabwriter.Writer)
+
+	w.Init(os.Stdout, 15, 8, 1, '\t', 0)
+	defer w.Flush()
+
+	fmt.Fprintf(w, "\n %s\t%s\t", "Context", "Endpoint")
+	fmt.Fprintf(w, "\n %s\t%s\t", "-------", "--------")
+
+	for _, v := range contexts {
+		fmt.Fprintf(w, "\n %s\t%s\t", v.Name, v.Endpoint)
+	}
 }

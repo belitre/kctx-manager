@@ -15,16 +15,16 @@ func CreateCommand() *cobra.Command {
 			if len(args) != 2 {
 				return fmt.Errorf("incorrect number of arguments")
 			}
-			kubeconfigFile, err := cmd.Flags().GetString("file")
+			kubeconfigArg, err := cmd.Flags().GetString("kubeconfig")
 			if err != nil {
 				return err
 			}
-			return rename(kubeconfigFile, args[0], args[1])
+			return rename(kubeconfigArg, args[0], args[1])
 		},
 	}
 	return cmd
 }
 
-func rename(kubeconfigFile, currentContextName, newContextName string) error {
-	return kubeconfig.RenameContext(kubeconfigFile, currentContextName, newContextName)
+func rename(kubeconfigArg, currentContextName, newContextName string) error {
+	return kubeconfig.RenameContext(kubeconfigArg, currentContextName, newContextName)
 }

@@ -25,7 +25,7 @@ func main() {
 	rootCmd.AddCommand(delete.CreateCommand())
 	rootCmd.AddCommand(rename.CreateCommand())
 
-	rootCmd.PersistentFlags().StringVarP(&kubeconfig, "file", "f", "", "Path to kubeconfig file, if not provided it will default to "+
+	rootCmd.PersistentFlags().StringVarP(&kubeconfig, "kubeconfig", "k", "", "Path to kubeconfig file, if not provided it will default to "+
 		"the value of $KUBECONFIG, and if the environment variable is not set it will default to $HOME/.kube/config")
 
 	if err := rootCmd.Execute(); err != nil {
