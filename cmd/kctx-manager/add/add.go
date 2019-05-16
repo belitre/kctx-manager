@@ -12,7 +12,7 @@ import (
 func CreateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add kubeconfig_file",
-		Short: "Adds the contexts defined in kubeconfig_file",
+		Short: "Add the contexts defined in kubeconfig_file",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
 				return fmt.Errorf("incorrect number of arguments")

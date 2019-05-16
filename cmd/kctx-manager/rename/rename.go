@@ -10,7 +10,7 @@ import (
 func CreateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rename current_context_name new_context_name",
-		Short: "Renames current_context_name to new_context_name",
+		Short: "Rename current_context_name to new_context_name",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 2 {
 				return fmt.Errorf("incorrect number of arguments")

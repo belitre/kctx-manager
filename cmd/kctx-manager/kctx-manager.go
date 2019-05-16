@@ -16,7 +16,7 @@ var kubeconfig string
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "kctx-manager",
-		Short: "A wee program to manage your $HOME/.kube/config",
+		Short: "A CLI tool to manage your $HOME/.kube/config",
 	}
 
 	rootCmd.AddCommand(version.CreateCommand())

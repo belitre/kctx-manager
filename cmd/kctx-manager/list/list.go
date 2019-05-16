@@ -8,7 +8,7 @@ import (
 func CreateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Shows current contexts",
+		Short: "Show current contexts",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			kubeconfigArg, err := cmd.Flags().GetString("kubeconfig")
 			if err != nil {

@@ -19,8 +19,8 @@ const (
 func CreateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Prints the version number of " + programName,
-		Long:  `Prints the version number of ` + programName,
+		Short: "Print the version number of " + programName,
+		Long:  `Print the version number of ` + programName,
 		Run: func(cmd *cobra.Command, args []string) {
 			printVersion()
 		},

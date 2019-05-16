@@ -10,7 +10,7 @@ import (
 func CreateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete context_name",
-		Short: "Deletes the context specified in context_name",
+		Short: "Delete the context specified in context_name",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
 				return fmt.Errorf("incorrect number of arguments")
