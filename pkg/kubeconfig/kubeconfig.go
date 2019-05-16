@@ -100,8 +100,14 @@ func AddContext(kubeconfigArg, newKubeconfigPath string) error {
 		return err
 	}
 
-	mapCurrentClusters := splitClusters(currentConfig)
 	mapNewClusters := splitClusters(toAddConfig)
+
+	if len(mapNewClusters) == 0 {
+		fmt.Println("No contexts added/updated.")
+		return nil
+	}
+
+	mapCurrentClusters := splitClusters(currentConfig)
 
 	for n, c := range mapNewClusters {
 		mapCurrentClusters[n] = c
@@ -120,15 +126,12 @@ func AddContext(kubeconfigArg, newKubeconfigPath string) error {
 	currentConfig.AuthInfos = users
 	currentConfig.Contexts = contexts
 
-	if len(mapNewClusters) > 0 {
-		if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
-			return err
-		}
-		for k := range mapNewClusters {
-			fmt.Println(fmt.Sprintf("Context %s added/updated", k))
-		}
-	} else {
-		fmt.Println("No contexts added/updated.")
+	if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
+		return err
+	}
+
+	for k := range mapNewClusters {
+		fmt.Println(fmt.Sprintf("Context %s added/updated", k))
 	}
 
 	return nil
@@ -160,16 +163,18 @@ func RenameContext(kubeconfigArg, contextName, newName string) error {
 
 	mapCurrentClusters := splitClusters(currentConfig)
 
+	if _, ok := mapCurrentClusters[contextName]; !ok {
+		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
+		return nil
+	}
+
 	users := []v1.NamedAuthInfo{}
 	clusters := []v1.NamedCluster{}
 	contexts := []v1.NamedContext{}
 
-	contextFound := false
-
 	for n, c := range mapCurrentClusters {
 		if n == contextName {
 			c.Contexts[0].Name = newName
-			contextFound = true
 		}
 		users = append(users, c.AuthInfos...)
 		clusters = append(clusters, c.Clusters...)
@@ -184,14 +189,11 @@ func RenameContext(kubeconfigArg, contextName, newName string) error {
 		currentConfig.CurrentContext = newName
 	}
 
-	if contextFound {
-		if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
-			return err
-		}
-		fmt.Println(fmt.Sprintf("Context %s renamed to %s successfully!", contextName, newName))
-	} else {
-		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
+	if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
+		return err
 	}
+
+	fmt.Println(fmt.Sprintf("Context %s renamed to %s successfully!", contextName, newName))
 
 	return nil
 }
@@ -209,19 +211,20 @@ func DeleteContext(kubeconfigArg, contextName string) error {
 
 	mapCurrentClusters := splitClusters(currentConfig)
 
+	if _, ok := mapCurrentClusters[contextName]; !ok {
+		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
+		return nil
+	}
+
 	users := []v1.NamedAuthInfo{}
 	clusters := []v1.NamedCluster{}
 	contexts := []v1.NamedContext{}
-
-	contextFound := false
 
 	for n, c := range mapCurrentClusters {
 		if n != contextName {
 			users = append(users, c.AuthInfos...)
 			clusters = append(clusters, c.Clusters...)
 			contexts = append(contexts, c.Contexts...)
-		} else {
-			contextFound = true
 		}
 	}
 
@@ -233,14 +236,11 @@ func DeleteContext(kubeconfigArg, contextName string) error {
 		currentConfig.CurrentContext = ""
 	}
 
-	if contextFound {
-		if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
-			return err
-		}
-		fmt.Println(fmt.Sprintf("Context %s deleted successfully!", contextName))
-	} else {
-		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
+	if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
+		return err
 	}
+
+	fmt.Println(fmt.Sprintf("Context %s deleted successfully!", contextName))
 
 	return nil
 }
