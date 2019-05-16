@@ -48,6 +48,13 @@ Global Flags:
   -k, --kubeconfig string   Path to kubeconfig file, if not provided it will default to the value of $KUBECONFIG, and if the environment variable is not set it will default to $HOME/.kube/config
 ```
 
+```
+$ kctx-manager add $HOME/Downloads/my_kubeconfig.yaml
+Context coolcluster added/updated
+Context patata added/updated
+Context bobedilla added/updated
+```
+
 ### Delete
 
 `delete` will delete the context used as parameter from the default kubeconfig.
@@ -61,6 +68,11 @@ Flags:
 
 Global Flags:
   -k, --kubeconfig string   Path to kubeconfig file, if not provided it will default to the value of $KUBECONFIG, and if the environment variable is not set it will default to $HOME/.kube/config
+```
+
+```
+$ kctx-manager delete bobedilla
+Context bobedilla deleted successfully!
 ```
 
 ### List
@@ -78,6 +90,19 @@ Global Flags:
   -k, --kubeconfig string   Path to kubeconfig file, if not provided it will default to the value of $KUBECONFIG, and if the environment variable is not set it will default to $HOME/.kube/config
 ```
 
+```
+$ kctx-manager list
+
+ Context            Endpoint
+ -------            --------
+ minikube           https://192.168.64.5:8443
+ patata             https://asd.yl4.eu-west-1.eks.amazonaws.com
+ rancher            https://rancher.myhost.com/k8s/clusters/local
+ bobedilla          https://bgd.sk1.eu-west-1.eks.amazonaws.com
+ coolcluster        https://35.12.76.234
+ docker-for-desktop https://localhost:6443
+```
+
 ### Rename
 
 `rename` will change the name to a context. __This will only change the name of the context! It won't change the name of the cluster or the user in the kubeconfig file.__
@@ -91,4 +116,9 @@ Flags:
 
 Global Flags:
   -k, --kubeconfig string   Path to kubeconfig file, if not provided it will default to the value of $KUBECONFIG, and if the environment variable is not set it will default to $HOME/.kube/config
+```
+
+```
+$ kctx-manager rename patata zorrocotropo
+Context patata renamed to zorrocotropo successfully!
 ```
