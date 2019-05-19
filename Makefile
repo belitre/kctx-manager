@@ -36,7 +36,7 @@ info:
 	 @echo "Git Commit:        ${GIT_COMMIT}"
 
 .PHONY: build
-build:
+build: tidy
 	GOBIN=$(BINDIR) $(GO) install -ldflags '$(LDFLAGS)' $(BUILD_PATH)
 
 # usage: make clean build-cross dist VERSION=v0.2-alpha
@@ -80,3 +80,11 @@ endif
 ifndef HAS_GIT
 	$(error You must install Git)
 endif
+
+.PHONY: tidy
+tidy:
+	go mod tidy
+
+.PHONY: vendor
+vendor: tidy
+	go mod vendor

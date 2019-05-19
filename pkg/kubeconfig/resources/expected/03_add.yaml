@@ -1,0 +1,69 @@
+clusters:
+- cluster:
+    certificate-authority-data: YmxlaAo=
+    server: https://35.234.65.23
+  name: coolcluster
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://localhost:6443
+  name: docker-for-desktop-cluster
+- cluster:
+    certificate-authority: /Users/miguel/.minikube/ca.crt
+    server: https://192.168.64.5:8443
+  name: minikube
+- cluster:
+    certificate-authority-data: YmxlaAo=
+    server: https://aaaa.com
+  name: bobedilla
+contexts:
+- context:
+    cluster: coolcluster
+    namespace: monitoring
+    user: coolcluster
+  name: coolcluster
+- context:
+    cluster: docker-for-desktop-cluster
+    user: docker-for-desktop
+  name: docker-for-desktop
+- context:
+    cluster: minikube
+    namespace: custom-system
+    user: minikube
+  name: minikube
+- context:
+    cluster: bobedilla
+    namespace: cattle-system
+    user: bobedilla
+  name: bobedilla
+current-context: "minikube"
+preferences: {}
+users:
+- name: coolcluster
+  user:
+    auth-provider:
+      config:
+        access-token: YmxlaAo=
+        cmd-args: config config-helper --format=json
+        cmd-path: /Users/myuser/google-cloud-sdk/bin/gcloud
+        expiry: "2019-05-16T22:22:34Z"
+        expiry-key: '{.credential.token_expiry}'
+        token-key: '{.credential.access_token}'
+      name: gcp
+- name: docker-for-desktop
+  user:
+    client-certificate-data: YmxlaAo=
+    client-key-data: YmxlaAo=
+- name: minikube
+  user:
+    client-certificate: /Users/myuser/.minikube/client.crt
+    client-key: /Users/myuser/.minikube/client.key
+- name: bobedilla
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      args:
+      - token
+      - -i
+      - bobedilla
+      command: aws-iam-authenticator
+      env: null

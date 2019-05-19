@@ -1,0 +1,46 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: YmxlaAo=
+    server: https://aaaa.com
+  name: bobedilla
+- cluster:
+    certificate-authority-data: YmxlaAo=
+    server: https://35.234.65.23
+  name: coolcluster
+contexts:
+- context:
+    cluster: bobedilla
+    namespace: cattle-system
+    user: bobedilla
+  name: bobedilla
+- context:
+    cluster: coolcluster
+    namespace: monitoring
+    user: coolcluster
+  name: coolcluster
+current-context: coolcluster
+kind: Config
+preferences: {}
+users:
+- name: bobedilla
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      args:
+      - token
+      - -i
+      - bobedilla
+      command: aws-iam-authenticator
+      env: null
+- name: coolcluster
+  user:
+    auth-provider:
+      config:
+        access-token: YmxlaAo=
+        cmd-args: config config-helper --format=json
+        cmd-path: /Users/myuser/google-cloud-sdk/bin/gcloud
+        expiry: "2019-05-16T22:22:34Z"
+        expiry-key: '{.credential.token_expiry}'
+        token-key: '{.credential.access_token}'
+      name: gcp
