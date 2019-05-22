@@ -107,18 +107,21 @@ $ kctx-manager list
 
 `rename` will change the name to a context. __This will only change the name of the context! It won't change the name of the cluster or the user in the kubeconfig file.__
 
+If a context with the same already exists `rename will fail`. To override the context with the same name use the flag `-f` or `--force`
+
 ```
 Usage:
   kctx-manager rename current_context_name new_context_name [flags]
 
 Flags:
-  -h, --help   help for rename
+  -f, --force   Forces rename. If new_context_name already exists it will be deleted.
+  -h, --help    help for rename
 
 Global Flags:
   -k, --kubeconfig string   Path to kubeconfig file, if not provided it will default to the value of $KUBECONFIG, and if the environment variable is not set it will default to $HOME/.kube/config
 ```
 
 ```
-$ kctx-manager rename patata zorrocotropo
+$ kctx-manager rename patata zorrocotropo -f
 Context patata renamed to zorrocotropo successfully!
 ```
