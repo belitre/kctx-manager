@@ -55,7 +55,7 @@ dist:
 
 .PHONY: test
 test: build
-test: TESTFLAGS += -race -v
+test: TESTFLAGS += -v
 test: test-unit
 
 .PHONY: test-unit
@@ -76,7 +76,6 @@ bootstrap:
 ifndef HAS_GOX
 	go get -u github.com/mitchellh/gox
 endif
-
 ifndef HAS_GIT
 	$(error You must install Git)
 endif
