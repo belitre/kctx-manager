@@ -150,7 +150,7 @@ func saveConfig(config *v1.Config, kubeconfigPath string) error {
 	return nil
 }
 
-func RenameContext(kubeconfigArg, contextName, newName string) error {
+func RenameContext(kubeconfigArg, contextName, newName string, isForce bool) error {
 	kubeconfigPath, err := getKubeconfigPath(kubeconfigArg)
 	if err != nil {
 		return err
@@ -166,6 +166,14 @@ func RenameContext(kubeconfigArg, contextName, newName string) error {
 	if _, ok := mapCurrentClusters[contextName]; !ok {
 		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
 		return nil
+	}
+
+	if _, ok := mapCurrentClusters[newName]; ok {
+		if isForce {
+			delete(mapCurrentClusters, newName)
+		} else {
+			return fmt.Errorf("Error, context %s already exists in %s", newName, kubeconfigPath)
+		}
 	}
 
 	users := []v1.NamedAuthInfo{}
@@ -283,12 +291,23 @@ func ListContexts(kubeconfigArg string) error {
 		return err
 	}
 
-	contexts, err := getContextsWithEndpoint(kubeconfigPath)
+	currentConfig, err := getClustersConfig(kubeconfigPath)
 	if err != nil {
 		return err
 	}
 
-	printContexts(contexts, kubeconfigPath)
+	mapCurrentClusters := splitClusters(currentConfig)
+
+	listContexts := []*ContextWithEndpoint{}
+	for k, v := range mapCurrentClusters {
+		ctxWithEndpoint := &ContextWithEndpoint{
+			Endpoint: v.Clusters[0].Cluster.Server,
+			Name:     k,
+		}
+		listContexts = append(listContexts, ctxWithEndpoint)
+	}
+
+	printContexts(listContexts, kubeconfigPath)
 
 	return nil
 }
@@ -310,4 +329,6 @@ func printContexts(contexts []*ContextWithEndpoint, kubeconfigPath string) {
 	for _, v := range contexts {
 		fmt.Fprintf(w, "\n %s\t%s\t", v.Name, v.Endpoint)
 	}
+
+	fmt.Fprintf(w, "\n\n")
 }
