@@ -30,6 +30,10 @@
               "release": "patch"
             },
             {
+              "type": "refactor",
+              "release": "patch"
+            },
+            {
               "type": "feat",
               "release": "minor"
             },
@@ -44,7 +48,7 @@
       [
         "@semantic-release/exec",
         {
-          "prepare": "make test clean build-cross dist VERSION=${nextRelease.version}"
+          "prepare": "make test clean build-cross dist VERSION=v${nextRelease.version}"
         }
       ],
       [
