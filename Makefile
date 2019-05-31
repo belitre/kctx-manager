@@ -16,6 +16,8 @@ NAME=kctx-manager
 GIT_COMMIT = $(shell git rev-parse HEAD)
 GIT_SHA    = $(shell git rev-parse --short HEAD)
 GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
+HAS_GOX := $(shell command -v gox;)
+HAS_GIT := $(shell command -v git;)
 
 ifdef VERSION
 	BINARY_VERSION = $(VERSION)
@@ -68,8 +70,11 @@ test-unit:
 clean:
 	@rm -rf $(BINDIR) ./_dist
 
-HAS_GOX := $(shell command -v gox;)
-HAS_GIT := $(shell command -v git;)
+.PHONY: semantic-release
+semantic-release:
+	npm install
+	npm audit fix
+	npx semantic-release
 
 .PHONY: bootstrap
 bootstrap:
