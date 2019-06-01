@@ -70,9 +70,8 @@
       ]
     ],
     "preset": "angular",
-    "branch": "master",
+    "branch": "feature/polish_semantic_release",
     "tagFormat": "v${version}",
-    "dryRun": false,
     "ci": true
   }
 }

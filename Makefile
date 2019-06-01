@@ -74,11 +74,10 @@ semantic-release:
 	npm install
 	npx semantic-release 
 
-.PHONY: semantic-release-dry-run
-semantic-release-dry-run:
+.PHONY: release-dry-run
+release-dry-run:
 	npm install
 	npx semantic-release -d
-
 
 .PHONY: bootstrap
 bootstrap:
