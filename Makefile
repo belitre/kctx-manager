@@ -74,8 +74,8 @@ semantic-release:
 	npm install
 	npx semantic-release 
 
-.PHONY: release-dry-run
-release-dry-run:
+.PHONY: semantic-release-dry-run
+semantic-release-dry-run:
 	npm install
 	npx semantic-release -d
 
