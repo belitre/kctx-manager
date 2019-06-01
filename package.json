@@ -4,7 +4,7 @@
   "main": "cmd/kctx-manager/kctx-manager.go",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/belitre/kctx-manager.git"
+    "url": "https://github.com/belitre/kctx-manager.git"
   },
   "author": "belitre",
   "license": "Apache-2.0",
