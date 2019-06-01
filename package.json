@@ -70,9 +70,9 @@
       ]
     ],
     "preset": "angular",
-    "branch": "feature/semantic-release",
+    "branch": "master",
     "tagFormat": "v${version}",
-    "dryRun": true,
+    "dryRun": false,
     "ci": true
   }
 }

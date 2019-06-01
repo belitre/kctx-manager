@@ -10,7 +10,6 @@ DIST_DIRS = find * -type d -exec
 SHELL = /bin/bash
 
 BUILD_PATH = github.com/belitre/kctx-manager/cmd/kctx-manager
-GITHUB_REPO = https://github.com/belitre/kctx-manager.git
 NAME = kctx-manager
 
 GIT_COMMIT = $(shell git rev-parse HEAD)
@@ -74,6 +73,12 @@ clean:
 semantic-release:
 	npm install
 	npx semantic-release 
+
+.PHONY: semantic-release-dry-run
+semantic-release-dry-run:
+	npm install
+	npx semantic-release -d
+
 
 .PHONY: bootstrap
 bootstrap:
