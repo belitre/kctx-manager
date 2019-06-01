@@ -79,7 +79,6 @@ semantic-release-dry-run:
 	npm install
 	npx semantic-release -d
 
-
 .PHONY: bootstrap
 bootstrap:
 ifndef HAS_GOX
