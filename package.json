@@ -1,0 +1,78 @@
+{
+  "name": "kctx-manager",
+  "description": "__A CLI tool to manage contexts in your $HOME/.kube/config or any other kubeconfig__",
+  "main": "cmd/kctx-manager/kctx-manager.go",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/belitre/kctx-manager.git"
+  },
+  "author": "belitre",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/belitre/kctx-manager/issues"
+  },
+  "homepage": "https://github.com/belitre/kctx-manager#readme",
+  "devDependencies": {
+    "@semantic-release/commit-analyzer": "^6.1.0",
+    "@semantic-release/exec": "^3.3.2",
+    "@semantic-release/github": "^5.2.10",
+    "@semantic-release/release-notes-generator": "^7.1.4",
+    "fstream": "^1.0.12",
+    "semantic-release": "^15.13.14",
+    "tar": "^4.4.9"
+  },
+  "release": {
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "releaseRules": [
+            {
+              "type": "fix",
+              "release": "patch"
+            },
+            {
+              "type": "refactor",
+              "release": "patch"
+            },
+            {
+              "type": "feat",
+              "release": "minor"
+            },
+            {
+              "type": "major",
+              "release": "major"
+            }
+          ]
+        }
+      ],
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/exec",
+        {
+          "prepare": "make test clean build-cross dist VERSION=v${nextRelease.version}"
+        }
+      ],
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            {
+              "path": "_dist/*.tar.gz"
+            },
+            {
+              "path": "_dist/*.zip"
+            }
+          ],
+          "successComment": false,
+          "failComment": false
+        }
+      ]
+    ],
+    "preset": "angular",
+    "branch": "master",
+    "tagFormat": "v${version}",
+    "dryRun": false,
+    "ci": true
+  }
+}

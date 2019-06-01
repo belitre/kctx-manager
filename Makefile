@@ -7,15 +7,16 @@ TESTFLAGS :=
 TARGETS   ?= darwin/amd64 linux/amd64 windows/amd64
 DIST_DIRS = find * -type d -exec
 
-SHELL=/bin/bash
+SHELL = /bin/bash
 
-BUILD_PATH=github.com/belitre/kctx-manager/cmd/kctx-manager
-
-NAME=kctx-manager
+BUILD_PATH = github.com/belitre/kctx-manager/cmd/kctx-manager
+NAME = kctx-manager
 
 GIT_COMMIT = $(shell git rev-parse HEAD)
 GIT_SHA    = $(shell git rev-parse --short HEAD)
 GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
+HAS_GOX := $(shell command -v gox;)
+HAS_GIT := $(shell command -v git;)
 
 ifdef VERSION
 	BINARY_VERSION = $(VERSION)
@@ -68,8 +69,16 @@ test-unit:
 clean:
 	@rm -rf $(BINDIR) ./_dist
 
-HAS_GOX := $(shell command -v gox;)
-HAS_GIT := $(shell command -v git;)
+.PHONY: semantic-release
+semantic-release:
+	npm install
+	npx semantic-release 
+
+.PHONY: semantic-release-dry-run
+semantic-release-dry-run:
+	npm install
+	npx semantic-release -d
+
 
 .PHONY: bootstrap
 bootstrap:
