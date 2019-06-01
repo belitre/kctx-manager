@@ -50,7 +50,7 @@
       [
         "@semantic-release/exec",
         {
-          "prepare": "make test clean build-cross dist VERSION=v${nextRelease.version}"
+          "verifyConditionsCmd": "./release.sh VERSION=v${nextRelease.version}"
         }
       ],
       [
@@ -72,6 +72,6 @@
     "preset": "angular",
     "branch": "feature/polish_semantic_release",
     "tagFormat": "v${version}",
-    "ci": true
+    "ci": false
   }
 }
