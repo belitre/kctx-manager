@@ -7,11 +7,11 @@ TESTFLAGS :=
 TARGETS   ?= darwin/amd64 linux/amd64 windows/amd64
 DIST_DIRS = find * -type d -exec
 
-SHELL=/bin/bash
+SHELL = /bin/bash
 
-BUILD_PATH=github.com/belitre/kctx-manager/cmd/kctx-manager
-
-NAME=kctx-manager
+BUILD_PATH = github.com/belitre/kctx-manager/cmd/kctx-manager
+GITHUB_REPO = https://github.com/belitre/kctx-manager.git
+NAME = kctx-manager
 
 GIT_COMMIT = $(shell git rev-parse HEAD)
 GIT_SHA    = $(shell git rev-parse --short HEAD)
@@ -74,7 +74,7 @@ clean:
 semantic-release:
 	npm install
 	npm audit fix
-	npx semantic-release
+	npx semantic-release -r $(GITHUB_REPO)
 
 .PHONY: bootstrap
 bootstrap:
