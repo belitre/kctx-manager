@@ -17,7 +17,9 @@
     "@semantic-release/exec": "^3.3.2",
     "@semantic-release/github": "^5.2.10",
     "@semantic-release/release-notes-generator": "^7.1.4",
-    "semantic-release": "^15.13.14"
+    "fstream": "^1.0.12",
+    "semantic-release": "^15.13.14",
+    "tar": "^4.4.9"
   },
   "release": {
     "plugins": [

@@ -73,8 +73,7 @@ clean:
 .PHONY: semantic-release
 semantic-release:
 	npm install
-	npm audit fix
-	npx semantic-release -r $(GITHUB_REPO)
+	npx semantic-release 
 
 .PHONY: bootstrap
 bootstrap:
