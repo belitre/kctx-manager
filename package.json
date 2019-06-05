@@ -64,8 +64,8 @@
               "path": "_dist/*.zip"
             }
           ],
-          "successComment": false,
-          "failComment": false
+          "successComment": true,
+          "failComment": true
         }
       ]
     ],
