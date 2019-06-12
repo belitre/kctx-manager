@@ -64,8 +64,8 @@
               "path": "_dist/*.zip"
             }
           ],
-          "successComment": true,
-          "failComment": true
+          "successComment": "This ${issue.pull_request ? 'pull request' : 'issue'} is included in version ${nextRelease.version}",
+          "failComment": "The release from ${branch} had failed due to the following errors:\n- ${errors.map(err => err.message).join('\\n- ')}"
         }
       ]
     ],
