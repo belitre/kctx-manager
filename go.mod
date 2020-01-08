@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/gogo/protobuf v1.2.1 // indirect
-	github.com/google/go-cmp v0.3.1
+	github.com/google/go-cmp v0.4.0
 	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
