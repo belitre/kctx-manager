@@ -71,7 +71,7 @@ clean:
 
 .PHONY: semantic-release
 semantic-release:
-	npm install
+	npm ci
 	npx semantic-release 
 
 .PHONY: semantic-release-dry-run
