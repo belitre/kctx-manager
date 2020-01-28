@@ -37,6 +37,8 @@ Use "kctx-manager [command] --help" for more information about a command.
 
 `add` will add all the contexts found in the `kubeconfig_file` used as parameter to the default kubeconfig. __If a context with the same name is found in the default kubeconfig file, `kctx-manager` will override it.__
 
+`add` will also change the name of the cluster and the name of the user before adding them to the kubeconfig file. Notice that it will only update the name, the rest of the information of each item will stay the same (server url, certificate, etc...). This is to avoid problems with auto generated kubeconfigs where you can have for example: for eks kubeconfigs with context and user with name `aws` and `kubernetes` for the cluster.
+
 ```
 Usage:
   kctx-manager add kubeconfig_file [flags]
@@ -113,7 +115,7 @@ $ kctx-manager list
 
 ### Rename
 
-`rename` will change the name to a context. __This will only change the name of the context! It won't change the name of the cluster or the user in the kubeconfig file.__
+`rename` will change the name to a context. __This will also change the name of the cluster and the name of the user in the kubeconfig file.__ Notice that it will only update the name, the rest of the information of each item will stay the same (endpoint url, certificates, etc...). This is to avoid problems with auto generated kubeconfigs where you can have for example: for eks kubeconfigs with context and user with name `aws` and `kubernetes` for the cluster.
 
 If a context with the same name already exists `rename` will fail. To override the context with the same name use the flag `-f` or `--force`
 
