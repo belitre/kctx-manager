@@ -2,14 +2,12 @@ package kubeconfig
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"text/tabwriter"
 
-	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
+	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/ghodss/yaml"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -40,168 +38,75 @@ func getKubeconfigPath(kubeconfigArg string) (string, error) {
 	return path.Join(home, defaultKubeconfig), nil
 }
 
-func getContextsWithEndpoint(kubeconfigPath string) ([]*ContextWithEndpoint, error) {
-	currentConfig, err := getClustersConfig(kubeconfigPath)
-
-	if err != nil {
-		return nil, err
-	}
-
-	mapClusterContext := map[string]string{}
-
-	for _, v := range currentConfig.Contexts {
-		mapClusterContext[v.Context.Cluster] = v.Name
-	}
-
-	listContexts := []*ContextWithEndpoint{}
-	for _, v := range currentConfig.Clusters {
-		if ctx, ok := mapClusterContext[v.Name]; ok {
-			ctxWithEndpoint := &ContextWithEndpoint{
-				Endpoint: v.Cluster.Server,
-				Name:     ctx,
-			}
-			listContexts = append(listContexts, ctxWithEndpoint)
-		}
-	}
-
-	return listContexts, nil
-}
-
-func getClustersConfig(kubeconfigPath string) (*v1.Config, error) {
-	fileContent, err := ioutil.ReadFile(kubeconfigPath)
-
-	if err != nil {
-		return nil, fmt.Errorf("Error while reading file %s, error was: %s", kubeconfigPath, err)
-	}
-
-	clustersConfig := &v1.Config{}
-
-	err = yaml.Unmarshal(fileContent, clustersConfig)
-	if err != nil {
-		return nil, fmt.Errorf("Error while unmarshalling file %s, error was: %s", kubeconfigPath, err)
-	}
-
-	return clustersConfig, nil
-}
-
-func AddContext(kubeconfigArg, newKubeconfigPath string) error {
+func AddContext(kubeconfigArg, newKubeconfigPath, newName string) error {
 	kubeconfigPath, err := getKubeconfigPath(kubeconfigArg)
 	if err != nil {
 		return err
 	}
 
-	currentConfig, err := getClustersConfig(kubeconfigPath)
+	currentConfig, err := clientcmd.LoadFromFile(kubeconfigPath)
+
 	if err != nil {
 		return err
 	}
 
-	toAddConfig, err := getClustersConfig(newKubeconfigPath)
+	toAddConfig, err := clientcmd.LoadFromFile(newKubeconfigPath)
+
 	if err != nil {
 		return err
 	}
 
-	mapNewClusters := splitClusters(toAddConfig)
+	isChangeName := len(newName) > 0
 
-	if len(mapNewClusters) == 0 {
-		fmt.Println("No contexts added/updated.")
-		return nil
+	if isChangeName && len(toAddConfig.Contexts) > 1 {
+		return fmt.Errorf("Error, can't rename context to %s, more than 1 context found in kubeconfig %s", newName, newKubeconfigPath)
 	}
 
-	mapCurrentClusters := splitClusters(currentConfig)
+	// rename everything in the config to add to avoid problems with configs like eks
+	for k, v := range toAddConfig.Contexts {
+		cluster := toAddConfig.Clusters[v.Cluster]
+		user := toAddConfig.AuthInfos[v.AuthInfo]
 
-	for n, c := range mapNewClusters {
-		mapCurrentClusters[n] = c
+		delete(toAddConfig.Clusters, v.Cluster)
+		delete(toAddConfig.AuthInfos, v.AuthInfo)
+
+		var updatedName string
+		if isChangeName {
+			updatedName = newName
+		} else {
+			updatedName = k
+		}
+
+		v.Cluster = updatedName
+		v.AuthInfo = updatedName
+		toAddConfig.Contexts[updatedName] = v
+		toAddConfig.Clusters[updatedName] = cluster
+		toAddConfig.AuthInfos[updatedName] = user
+		delete(toAddConfig.Contexts, k)
+		toAddConfig.Contexts[updatedName] = v
 	}
 
-	users := []v1.NamedAuthInfo{}
-	clusters := []v1.NamedCluster{}
-	contexts := []v1.NamedContext{}
-	for _, c := range mapCurrentClusters {
-		users = append(users, c.AuthInfos...)
-		clusters = append(clusters, c.Clusters...)
-		contexts = append(contexts, c.Contexts...)
+	// now we have all the new contexts with the correct names, so let's merge maps
+	for k, v := range toAddConfig.Contexts {
+		// but of course if we have the same context already we have to update it properly
+		if currentCtx, ok := currentConfig.Contexts[k]; ok {
+			// context found! let's remove it cause we are adding a new one
+			delete(currentConfig.Clusters, currentCtx.Cluster)
+			delete(currentConfig.AuthInfos, currentCtx.AuthInfo)
+			delete(currentConfig.Contexts, k)
+		}
+		currentConfig.Contexts[k] = v
+		currentConfig.Clusters[v.Cluster] = toAddConfig.Clusters[v.Cluster]
+		currentConfig.AuthInfos[v.AuthInfo] = toAddConfig.AuthInfos[v.AuthInfo]
 	}
 
-	currentConfig.Clusters = clusters
-	currentConfig.AuthInfos = users
-	currentConfig.Contexts = contexts
-
-	if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
+	if err = clientcmd.WriteToFile(*currentConfig, kubeconfigPath); err != nil {
 		return err
 	}
 
-	for k := range mapNewClusters {
+	for k, _ := range toAddConfig.Contexts {
 		fmt.Println(fmt.Sprintf("Context %s added/updated", k))
 	}
-
-	return nil
-}
-
-func saveConfig(config *v1.Config, kubeconfigPath string) error {
-	bytes, err := yaml.Marshal(config)
-	if err != nil {
-		return fmt.Errorf("Error while Marshaling result, error was: %s", err)
-	}
-
-	if err = ioutil.WriteFile(kubeconfigPath, bytes, 0644); err != nil {
-		return fmt.Errorf("Error while saving file %s, error was: %s", kubeconfigPath, err)
-	}
-
-	return nil
-}
-
-func RenameContext(kubeconfigArg, contextName, newName string, isForce bool) error {
-	kubeconfigPath, err := getKubeconfigPath(kubeconfigArg)
-	if err != nil {
-		return err
-	}
-
-	currentConfig, err := getClustersConfig(kubeconfigPath)
-	if err != nil {
-		return err
-	}
-
-	mapCurrentClusters := splitClusters(currentConfig)
-
-	if _, ok := mapCurrentClusters[contextName]; !ok {
-		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
-		return nil
-	}
-
-	if _, ok := mapCurrentClusters[newName]; ok {
-		if isForce {
-			delete(mapCurrentClusters, newName)
-		} else {
-			return fmt.Errorf("Error, context %s already exists in %s", newName, kubeconfigPath)
-		}
-	}
-
-	users := []v1.NamedAuthInfo{}
-	clusters := []v1.NamedCluster{}
-	contexts := []v1.NamedContext{}
-
-	for n, c := range mapCurrentClusters {
-		if n == contextName {
-			c.Contexts[0].Name = newName
-		}
-		users = append(users, c.AuthInfos...)
-		clusters = append(clusters, c.Clusters...)
-		contexts = append(contexts, c.Contexts...)
-	}
-
-	currentConfig.Clusters = clusters
-	currentConfig.AuthInfos = users
-	currentConfig.Contexts = contexts
-
-	if currentConfig.CurrentContext == contextName {
-		currentConfig.CurrentContext = newName
-	}
-
-	if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
-		return err
-	}
-
-	fmt.Println(fmt.Sprintf("Context %s renamed to %s successfully!", contextName, newName))
 
 	return nil
 }
@@ -212,39 +117,24 @@ func DeleteContext(kubeconfigArg, contextName string) error {
 		return err
 	}
 
-	currentConfig, err := getClustersConfig(kubeconfigPath)
+	currentConfig, err := clientcmd.LoadFromFile(kubeconfigPath)
+
 	if err != nil {
 		return err
 	}
 
-	mapCurrentClusters := splitClusters(currentConfig)
-
-	if _, ok := mapCurrentClusters[contextName]; !ok {
+	if _, ok := currentConfig.Contexts[contextName]; !ok {
 		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
 		return nil
 	}
 
-	users := []v1.NamedAuthInfo{}
-	clusters := []v1.NamedCluster{}
-	contexts := []v1.NamedContext{}
+	deleteContext := currentConfig.Contexts[contextName]
 
-	for n, c := range mapCurrentClusters {
-		if n != contextName {
-			users = append(users, c.AuthInfos...)
-			clusters = append(clusters, c.Clusters...)
-			contexts = append(contexts, c.Contexts...)
-		}
-	}
+	delete(currentConfig.Clusters, deleteContext.Cluster)
+	delete(currentConfig.AuthInfos, deleteContext.AuthInfo)
+	delete(currentConfig.Contexts, contextName)
 
-	currentConfig.Clusters = clusters
-	currentConfig.AuthInfos = users
-	currentConfig.Contexts = contexts
-
-	if currentConfig.CurrentContext == contextName {
-		currentConfig.CurrentContext = ""
-	}
-
-	if err = saveConfig(currentConfig, kubeconfigPath); err != nil {
+	if err = clientcmd.WriteToFile(*currentConfig, kubeconfigPath); err != nil {
 		return err
 	}
 
@@ -253,36 +143,56 @@ func DeleteContext(kubeconfigArg, contextName string) error {
 	return nil
 }
 
-func splitClusters(config *v1.Config) map[string]*v1.Config {
-	mapConfigs := map[string]*v1.Config{}
-
-	mapClusters := map[string]v1.NamedCluster{}
-	mapUsers := map[string]v1.NamedAuthInfo{}
-
-	for _, v := range config.Clusters {
-		mapClusters[v.Name] = v
+func RenameContext(kubeconfigArg, contextName, newName string, isForce bool) error {
+	kubeconfigPath, err := getKubeconfigPath(kubeconfigArg)
+	if err != nil {
+		return err
 	}
 
-	for _, v := range config.AuthInfos {
-		mapUsers[v.Name] = v
+	currentConfig, err := clientcmd.LoadFromFile(kubeconfigPath)
+
+	if err != nil {
+		return err
 	}
 
-	for _, v := range config.Contexts {
-		newConfig := &v1.Config{
-			Contexts: []v1.NamedContext{
-				v,
-			},
-			AuthInfos: []v1.NamedAuthInfo{
-				mapUsers[v.Context.AuthInfo],
-			},
-			Clusters: []v1.NamedCluster{
-				mapClusters[v.Context.Cluster],
-			},
+	if _, ok := currentConfig.Contexts[contextName]; !ok {
+		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
+		return nil
+	}
+
+	if _, ok := currentConfig.Contexts[newName]; ok {
+		if !isForce {
+			return fmt.Errorf("Error, context %s already exists in %s", newName, kubeconfigPath)
 		}
-		mapConfigs[v.Name] = newConfig
 	}
 
-	return mapConfigs
+	renameContext := currentConfig.Contexts[contextName]
+	renameUser := currentConfig.AuthInfos[renameContext.AuthInfo]
+	renameCluster := currentConfig.Clusters[renameContext.Cluster]
+
+	//rename everything
+	renameContext.Cluster = newName
+	renameContext.AuthInfo = newName
+
+	currentConfig.Contexts[newName] = renameContext
+	currentConfig.Clusters[newName] = renameCluster
+	currentConfig.AuthInfos[newName] = renameUser
+
+	delete(currentConfig.Contexts, contextName)
+	delete(currentConfig.Clusters, contextName)
+	delete(currentConfig.AuthInfos, contextName)
+
+	if currentConfig.CurrentContext == contextName {
+		currentConfig.CurrentContext = newName
+	}
+
+	if err = clientcmd.WriteToFile(*currentConfig, kubeconfigPath); err != nil {
+		return err
+	}
+
+	fmt.Println(fmt.Sprintf("Context %s renamed to %s successfully!", contextName, newName))
+
+	return nil
 }
 
 func ListContexts(kubeconfigArg string) error {
@@ -291,17 +201,17 @@ func ListContexts(kubeconfigArg string) error {
 		return err
 	}
 
-	currentConfig, err := getClustersConfig(kubeconfigPath)
+	currentConfig, err := clientcmd.LoadFromFile(kubeconfigPath)
+
 	if err != nil {
 		return err
 	}
 
-	mapCurrentClusters := splitClusters(currentConfig)
-
 	listContexts := []*ContextWithEndpoint{}
-	for k, v := range mapCurrentClusters {
+
+	for k, v := range currentConfig.Contexts {
 		ctxWithEndpoint := &ContextWithEndpoint{
-			Endpoint: v.Clusters[0].Cluster.Server,
+			Endpoint: currentConfig.Clusters[v.Cluster].Server,
 			Name:     k,
 		}
 		listContexts = append(listContexts, ctxWithEndpoint)

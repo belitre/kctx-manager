@@ -17,7 +17,7 @@ clusters:
 - cluster:
     insecure-skip-tls-verify: true
     server: https://localhost:6443
-  name: docker-for-desktop-cluster
+  name: docker-for-desktop
 contexts:
 - context:
     cluster: minikube
@@ -40,7 +40,7 @@ contexts:
     user: coolcluster
   name: coolcluster
 - context:
-    cluster: docker-for-desktop-cluster
+    cluster: docker-for-desktop
     user: docker-for-desktop
   name: docker-for-desktop
 current-context: "minikube"

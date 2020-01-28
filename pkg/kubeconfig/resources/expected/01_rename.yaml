@@ -3,20 +3,20 @@ clusters:
 - cluster:
     insecure-skip-tls-verify: true
     server: https://localhost:6443
-  name: docker-for-desktop-cluster
+  name: docker-for-desktop
 - cluster:
     certificate-authority: /Users/miguel/.minikube/ca.crt
     server: https://192.168.64.5:8443
-  name: minikube
+  name: belitre
 contexts:
 - context:
-    cluster: docker-for-desktop-cluster
+    cluster: docker-for-desktop
     user: docker-for-desktop
   name: docker-for-desktop
 - context:
-    cluster: minikube
+    cluster: belitre
     namespace: custom-system
-    user: minikube
+    user: belitre
   name: belitre
 current-context: "belitre"
 kind: Config
@@ -26,7 +26,7 @@ users:
   user:
     client-certificate-data: YmxlaAo=
     client-key-data: YmxlaAo=
-- name: minikube
+- name: belitre
   user:
     client-certificate: /Users/myuser/.minikube/client.crt
     client-key: /Users/myuser/.minikube/client.key

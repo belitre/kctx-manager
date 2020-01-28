@@ -6,7 +6,7 @@ clusters:
 - cluster:
     insecure-skip-tls-verify: true
     server: https://localhost:6443
-  name: docker-for-desktop-cluster
+  name: docker-for-desktop
 - cluster:
     certificate-authority: /Users/miguel/.minikube/ca.crt
     server: https://192.168.64.5:8443
@@ -22,7 +22,7 @@ contexts:
     user: coolcluster
   name: coolcluster
 - context:
-    cluster: docker-for-desktop-cluster
+    cluster: docker-for-desktop
     user: docker-for-desktop
   name: docker-for-desktop
 - context:

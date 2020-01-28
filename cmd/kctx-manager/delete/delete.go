@@ -22,10 +22,10 @@ func CreateCommand() *cobra.Command {
 			return delete(kubeconfigArg, args[0])
 		},
 	}
+
 	return cmd
 }
 
 func delete(kubeconfigArg, contextName string) error {
-	err := kubeconfig.DeleteContext(kubeconfigArg, contextName)
-	return err
+	return kubeconfig.DeleteContext(kubeconfigArg, contextName)
 }
