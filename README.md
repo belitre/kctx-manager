@@ -42,7 +42,8 @@ Usage:
   kctx-manager add kubeconfig_file [flags]
 
 Flags:
-  -h, --help   help for add
+  -h, --help          help for add
+  -n, --name string   name of the cluster. Use this argument if you want to rename the cluster while adding it.
 
 Global Flags:
   -k, --kubeconfig string   Path to kubeconfig file, if not provided it will default to the value of $KUBECONFIG, and if the environment variable is not set it will default to $HOME/.kube/config
@@ -53,6 +54,13 @@ $ kctx-manager add $HOME/Downloads/my_kubeconfig.yaml
 Context coolcluster added/updated
 Context patata added/updated
 Context bobedilla added/updated
+```
+
+If the kubeconfig we want to add has only one context we can add it overriding the name using the flag `-n`:
+
+```
+$ kctx-manager add $HOME/Downloads/my_kubeconfig.yaml -n bleh
+Context bleh added/updated
 ```
 
 ### Delete

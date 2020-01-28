@@ -72,8 +72,7 @@
     ],
     "preset": "angular",
     "branches": [
-      "master",
-      "feature/add_correct_names"
+      "master"
     ],
     "tagFormat": "v${version}",
     "ci": false
