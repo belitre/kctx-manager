@@ -1,10 +1,17 @@
 package kubeconfig
 
 import (
+	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
+	"k8s.io/client-go/tools/clientcmd"
+
+	clientcmdv1 "k8s.io/client-go/tools/clientcmd/api/v1"
+	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 const (
@@ -13,11 +20,11 @@ const (
 )
 
 func initDefaultKubeconfig(t *testing.T) {
-	defaultKubeconfig, err := getClustersConfig(DEFAULT_KUBECONFIG_PATH)
+	defaultKubeconfig, err := clientcmd.LoadFromFile(DEFAULT_KUBECONFIG_PATH)
 
 	assert.NoError(t, err)
 
-	err = saveConfig(defaultKubeconfig, KUBECONFIG_PATH)
+	err = clientcmd.WriteToFile(*defaultKubeconfig, KUBECONFIG_PATH)
 
 	assert.NoError(t, err)
 }
@@ -41,10 +48,10 @@ func TestKctxManager(t *testing.T) {
 	err = RenameContext(KUBECONFIG_PATH, "test", "lololo", false)
 	assert.NoError(t, err)
 	assertEquals(t, DEFAULT_KUBECONFIG_PATH)
-	err = AddContext(KUBECONFIG_PATH, "resources/01_add.yaml")
+	err = AddContext(KUBECONFIG_PATH, "resources/01_add.yaml", "")
 	assert.NoError(t, err)
 	assertEquals(t, "resources/expected/03_add.yaml")
-	err = AddContext(KUBECONFIG_PATH, "resources/02_add.yaml")
+	err = AddContext(KUBECONFIG_PATH, "resources/02_add.yaml", "")
 	assert.NoError(t, err)
 	assertEquals(t, "resources/expected/04_add.yaml")
 	err = DeleteContext(KUBECONFIG_PATH, "bobedilla")
@@ -62,9 +69,57 @@ func TestKctxManager(t *testing.T) {
 	err = RenameContext(KUBECONFIG_PATH, "coolcluster", "docker-for-desktop", false)
 	assert.NoError(t, err)
 	assertEquals(t, DEFAULT_KUBECONFIG_PATH)
-
 	initDefaultKubeconfig(t)
 	assertEquals(t, DEFAULT_KUBECONFIG_PATH)
+}
+
+func getClustersConfig(kubeconfigPath string) (*clientcmdv1.Config, error) {
+	fileContent, err := ioutil.ReadFile(kubeconfigPath)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error while reading file %s, error was: %s", kubeconfigPath, err)
+	}
+
+	clustersConfig := &v1.Config{}
+
+	err = yaml.Unmarshal(fileContent, clustersConfig)
+	if err != nil {
+		return nil, fmt.Errorf("Error while unmarshalling file %s, error was: %s", kubeconfigPath, err)
+	}
+
+	return clustersConfig, nil
+}
+
+func splitClusters(config *v1.Config) map[string]*v1.Config {
+	mapConfigs := map[string]*v1.Config{}
+
+	mapClusters := map[string]v1.NamedCluster{}
+	mapUsers := map[string]v1.NamedAuthInfo{}
+
+	for _, v := range config.Clusters {
+		mapClusters[v.Name] = v
+	}
+
+	for _, v := range config.AuthInfos {
+		mapUsers[v.Name] = v
+	}
+
+	for _, v := range config.Contexts {
+		newConfig := &v1.Config{
+			Contexts: []v1.NamedContext{
+				v,
+			},
+			AuthInfos: []v1.NamedAuthInfo{
+				mapUsers[v.Context.AuthInfo],
+			},
+			Clusters: []v1.NamedCluster{
+				mapClusters[v.Context.Cluster],
+			},
+		}
+		mapConfigs[v.Name] = newConfig
+	}
+
+	return mapConfigs
 }
 
 func assertEquals(t *testing.T, expected string) {
