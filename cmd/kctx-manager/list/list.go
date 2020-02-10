@@ -17,6 +17,7 @@ func CreateCommand() *cobra.Command {
 			return list(kubeconfigArg)
 		},
 	}
+
 	return cmd
 }
 

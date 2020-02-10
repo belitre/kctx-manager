@@ -15,62 +15,74 @@ import (
 )
 
 const (
-	KUBECONFIG_PATH         = "resources/kubeconfig.yaml"
-	DEFAULT_KUBECONFIG_PATH = "resources/expected/00_default.yaml"
+	kubeconfigPath        = "resources/kubeconfig.yaml"
+	defaultKubeconfigPath = "resources/expected/00_default.yaml"
 )
 
 func initDefaultKubeconfig(t *testing.T) {
-	defaultKubeconfig, err := clientcmd.LoadFromFile(DEFAULT_KUBECONFIG_PATH)
+	defaultKubeconfig, err := clientcmd.LoadFromFile(defaultKubeconfigPath)
 
 	assert.NoError(t, err)
 
-	err = clientcmd.WriteToFile(*defaultKubeconfig, KUBECONFIG_PATH)
+	err = clientcmd.WriteToFile(*defaultKubeconfig, kubeconfigPath)
 
 	assert.NoError(t, err)
 }
 
 func TestKctxManager(t *testing.T) {
 	initDefaultKubeconfig(t)
-	assertEquals(t, DEFAULT_KUBECONFIG_PATH)
+	assertEquals(t, defaultKubeconfigPath)
 
 	var err error
 
-	err = RenameContext(KUBECONFIG_PATH, "minikube", "belitre", false)
+	err = RenameContext(kubeconfigPath, "minikube", "belitre", false)
 	assert.NoError(t, err)
 	assertEquals(t, "resources/expected/01_rename.yaml")
-	err = RenameContext(KUBECONFIG_PATH, "docker-for-desktop", "blah", false)
+
+	err = RenameContext(kubeconfigPath, "docker-for-desktop", "blah", false)
 	assert.NoError(t, err)
 	assertEquals(t, "resources/expected/02_rename.yaml")
-	err = RenameContext(KUBECONFIG_PATH, "belitre", "minikube", false)
+
+	err = RenameContext(kubeconfigPath, "belitre", "minikube", false)
 	assert.NoError(t, err)
-	err = RenameContext(KUBECONFIG_PATH, "blah", "docker-for-desktop", false)
+
+	err = RenameContext(kubeconfigPath, "blah", "docker-for-desktop", false)
 	assert.NoError(t, err)
-	err = RenameContext(KUBECONFIG_PATH, "test", "lololo", false)
+
+	err = RenameContext(kubeconfigPath, "test", "lololo", false)
 	assert.NoError(t, err)
-	assertEquals(t, DEFAULT_KUBECONFIG_PATH)
-	err = AddContext(KUBECONFIG_PATH, "resources/01_add.yaml", "")
+	assertEquals(t, defaultKubeconfigPath)
+
+	err = AddContext(kubeconfigPath, "resources/01_add.yaml", "")
 	assert.NoError(t, err)
 	assertEquals(t, "resources/expected/03_add.yaml")
-	err = AddContext(KUBECONFIG_PATH, "resources/02_add.yaml", "")
+
+	err = AddContext(kubeconfigPath, "resources/02_add.yaml", "")
 	assert.NoError(t, err)
 	assertEquals(t, "resources/expected/04_add.yaml")
-	err = DeleteContext(KUBECONFIG_PATH, "bobedilla")
+
+	err = DeleteContext(kubeconfigPath, "bobedilla")
 	assert.NoError(t, err)
 	assertEquals(t, "resources/expected/05_delete.yaml")
-	err = DeleteContext(KUBECONFIG_PATH, "patata")
+
+	err = DeleteContext(kubeconfigPath, "patata")
 	assert.NoError(t, err)
-	err = DeleteContext(KUBECONFIG_PATH, "rancher")
+
+	err = DeleteContext(kubeconfigPath, "rancher")
 	assert.NoError(t, err)
-	err = RenameContext(KUBECONFIG_PATH, "docker-for-desktop", "coolcluster", false)
+
+	err = RenameContext(kubeconfigPath, "docker-for-desktop", "coolcluster", false)
 	assert.Error(t, err)
 	assertEquals(t, "resources/expected/06_rename_fail.yaml")
-	err = RenameContext(KUBECONFIG_PATH, "docker-for-desktop", "coolcluster", true)
+
+	err = RenameContext(kubeconfigPath, "docker-for-desktop", "coolcluster", true)
 	assert.NoError(t, err)
-	err = RenameContext(KUBECONFIG_PATH, "coolcluster", "docker-for-desktop", false)
+
+	err = RenameContext(kubeconfigPath, "coolcluster", "docker-for-desktop", false)
 	assert.NoError(t, err)
-	assertEquals(t, DEFAULT_KUBECONFIG_PATH)
+	assertEquals(t, defaultKubeconfigPath)
 	initDefaultKubeconfig(t)
-	assertEquals(t, DEFAULT_KUBECONFIG_PATH)
+	assertEquals(t, defaultKubeconfigPath)
 }
 
 func getClustersConfig(kubeconfigPath string) (*clientcmdv1.Config, error) {
@@ -127,7 +139,7 @@ func assertEquals(t *testing.T, expected string) {
 
 	assert.NoError(t, err)
 
-	kubeconfig, err := getClustersConfig(KUBECONFIG_PATH)
+	kubeconfig, err := getClustersConfig(kubeconfigPath)
 
 	assert.NoError(t, err)
 

@@ -13,6 +13,7 @@ import (
 
 var kubeconfig string
 
+//nolint gomnd
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "kctx-manager",

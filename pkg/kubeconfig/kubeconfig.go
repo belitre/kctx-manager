@@ -32,7 +32,7 @@ func getKubeconfigPath(kubeconfigArg string) (string, error) {
 
 	home, err := homedir.Dir()
 	if err != nil {
-		return "", fmt.Errorf("Error while getting user home dir, error was: %s", err)
+		return "", fmt.Errorf("error while getting user home dir, error was: %s", err)
 	}
 
 	return path.Join(home, defaultKubeconfig), nil
@@ -59,7 +59,7 @@ func AddContext(kubeconfigArg, newKubeconfigPath, newName string) error {
 	isChangeName := len(newName) > 0
 
 	if isChangeName && len(toAddConfig.Contexts) > 1 {
-		return fmt.Errorf("Error, can't rename context to %s, more than 1 context found in kubeconfig %s", newName, newKubeconfigPath)
+		return fmt.Errorf("error, can't rename context to %s, more than 1 context found in kubeconfig %s", newName, newKubeconfigPath)
 	}
 
 	// rename everything in the config to add to avoid problems with configs like eks
@@ -95,6 +95,7 @@ func AddContext(kubeconfigArg, newKubeconfigPath, newName string) error {
 			delete(currentConfig.AuthInfos, currentCtx.AuthInfo)
 			delete(currentConfig.Contexts, k)
 		}
+
 		currentConfig.Contexts[k] = v
 		currentConfig.Clusters[v.Cluster] = toAddConfig.Clusters[v.Cluster]
 		currentConfig.AuthInfos[v.AuthInfo] = toAddConfig.AuthInfos[v.AuthInfo]
@@ -104,7 +105,7 @@ func AddContext(kubeconfigArg, newKubeconfigPath, newName string) error {
 		return err
 	}
 
-	for k, _ := range toAddConfig.Contexts {
+	for k := range toAddConfig.Contexts {
 		fmt.Println(fmt.Sprintf("Context %s added/updated", k))
 	}
 
@@ -162,7 +163,7 @@ func RenameContext(kubeconfigArg, contextName, newName string, isForce bool) err
 
 	if _, ok := currentConfig.Contexts[newName]; ok {
 		if !isForce {
-			return fmt.Errorf("Error, context %s already exists in %s", newName, kubeconfigPath)
+			return fmt.Errorf("error, context %s already exists in %s", newName, kubeconfigPath)
 		}
 	}
 
