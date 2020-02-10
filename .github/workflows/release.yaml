@@ -1,0 +1,21 @@
+name: Publish release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps: 
+      - name: checkout
+        uses: actions/checkout@v2.0.0
+      - name: release
+        id: release
+        uses: ouzi-dev/go-make-action@v1.2.0
+        with: 
+          target: semantic-release

@@ -131,12 +131,3 @@ vendor: tidy
 fmt:
 	@echo "fmt target..."
 	@gofmt -l -w -s $(SRC)
-
-.PHONY: score
-score: PR_ID=$(shell echo $(GITHUB_REF) | tr -dc '0-9')
-score:
-	curl -X GET \
-	https://gogitops.beau.cf/$(GITHUB_REPOSITORY)/pull/$(PR_ID) \
-	-H 'apikey: $(GITOPS_API_KEY)' \
-	-H 'token: $(GITHUB_TOKEN)' \
-	-H 'user: $(GITHUB_USER)' \
