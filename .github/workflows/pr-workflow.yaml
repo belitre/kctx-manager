@@ -11,9 +11,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2.0.0
-      - name: build and test consumer
+      - name: build and test
         uses: ouzi-dev/go-make-action@v1.2.0
         with:
           target: 'build-cross'
-      - name: Run go report card on PR
-        run: make score GITOPS_API_KEY=${{ secrets.GITOPS_API_KEY }} 
+      - name: Run go report card
+        run: make score GITHUB_USER=github-actions GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} GITOPS_API_KEY=${{ secrets.GITOPS_API_KEY }} 
