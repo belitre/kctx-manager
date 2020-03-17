@@ -10,7 +10,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/tools/clientcmd"
 
-	clientcmdv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
@@ -85,7 +84,7 @@ func TestKctxManager(t *testing.T) {
 	assertEquals(t, defaultKubeconfigPath)
 }
 
-func getClustersConfig(kubeconfigPath string) (*clientcmdv1.Config, error) {
+func getClustersConfig(kubeconfigPath string) (*v1.Config, error) {
 	fileContent, err := ioutil.ReadFile(kubeconfigPath)
 
 	if err != nil {

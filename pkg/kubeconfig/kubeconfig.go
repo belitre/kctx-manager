@@ -106,7 +106,7 @@ func AddContext(kubeconfigArg, newKubeconfigPath, newName string) error {
 	}
 
 	for k := range toAddConfig.Contexts {
-		fmt.Println(fmt.Sprintf("Context %s added/updated", k))
+		fmt.Printf("Context %s added/updated\n", k)
 	}
 
 	return nil
@@ -125,7 +125,7 @@ func DeleteContext(kubeconfigArg, contextName string) error {
 	}
 
 	if _, ok := currentConfig.Contexts[contextName]; !ok {
-		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
+		fmt.Printf("Context %s not found in %s\n", contextName, kubeconfigPath)
 		return nil
 	}
 
@@ -139,7 +139,7 @@ func DeleteContext(kubeconfigArg, contextName string) error {
 		return err
 	}
 
-	fmt.Println(fmt.Sprintf("Context %s deleted successfully!", contextName))
+	fmt.Printf("Context %s deleted successfully!\n", contextName)
 
 	return nil
 }
