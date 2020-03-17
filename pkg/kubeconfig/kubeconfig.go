@@ -157,7 +157,7 @@ func RenameContext(kubeconfigArg, contextName, newName string, isForce bool) err
 	}
 
 	if _, ok := currentConfig.Contexts[contextName]; !ok {
-		fmt.Println(fmt.Sprintf("Context %s not found in %s", contextName, kubeconfigPath))
+		fmt.Printf("Context %s not found in %s\n", contextName, kubeconfigPath)
 		return nil
 	}
 
@@ -191,7 +191,7 @@ func RenameContext(kubeconfigArg, contextName, newName string, isForce bool) err
 		return err
 	}
 
-	fmt.Println(fmt.Sprintf("Context %s renamed to %s successfully!", contextName, newName))
+	fmt.Printf("Context %s renamed to %s successfully!\n", contextName, newName)
 
 	return nil
 }
@@ -225,7 +225,7 @@ func ListContexts(kubeconfigArg string) error {
 
 func printContexts(contexts []*ContextWithEndpoint, kubeconfigPath string) {
 	if len(contexts) == 0 {
-		fmt.Println(fmt.Sprintf("No contexts found in %s", kubeconfigPath))
+		fmt.Printf("No contexts found in %s\n", kubeconfigPath)
 		return
 	}
 
