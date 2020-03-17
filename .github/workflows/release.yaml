@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps: 
+    steps:
       - name: checkout
         uses: actions/checkout@v2.0.0
       - name: release
         id: release
-        uses: ouzi-dev/go-make-action@v1.2.0
-        with: 
+        uses: ouzi-dev/go-make-action@v1.4.0
+        with:
           target: semantic-release

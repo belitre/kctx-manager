@@ -22,7 +22,7 @@ HAS_GOX := $(shell command -v gox;)
 HAS_GIT := $(shell command -v git;)
 
 HAS_GOLANGCI_LINT := $(shell command -v golangci-lint;)
-GOLANGCI_LINT_VERSION := v1.23.1
+GOLANGCI_LINT_VERSION := v1.23.6
 
 GOLANGCI_VERSION_CHECK := $(shell golangci-lint --version | grep -oh $(GOLANGCI_LINT_VERSION);)
 
