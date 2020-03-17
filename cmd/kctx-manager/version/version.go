@@ -25,11 +25,13 @@ func CreateCommand() *cobra.Command {
 			printVersion()
 		},
 	}
+
 	return cmd
 }
 
 func printVersion() {
 	fmt.Printf("%s-%s\n", programName, Version)
+
 	if len(GitCommit) > 0 {
 		fmt.Printf("git commit: %s\n", GitCommit)
 	}

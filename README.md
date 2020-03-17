@@ -2,6 +2,9 @@
 
 __A CLI tool to manage contexts in your $HOME/.kube/config or any other kubeconfig__
 
+![Build and test](https://github.com/belitre/kctx-manager/workflows/Build%20and%20test/badge.svg)
+![Publish release](https://github.com/belitre/kctx-manager/workflows/Publish%20release/badge.svg)
+
 ## Install
 
 You can download kctx-manager binaries for windows, linux and mac from here: https://github.com/belitre/kctx-manager/releases

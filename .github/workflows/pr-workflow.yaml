@@ -1,0 +1,22 @@
+name: Build and test
+
+on: [pull_request]
+
+jobs:
+  build:
+    name: build and test
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: ouzi-dev/commit-status-updater@v1.0.3
+      - name: checkout
+        uses: actions/checkout@v2.0.0
+      - name: build and test
+        uses: ouzi-dev/go-make-action@v1.4.0
+        with:
+          target: "build-cross"
+      - if: always()
+        uses: ouzi-dev/commit-status-updater@v1.0.3
+        with:
+          status: "${{ job.status }}"
