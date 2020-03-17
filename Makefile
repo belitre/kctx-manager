@@ -131,3 +131,12 @@ vendor: tidy
 fmt:
 	@echo "fmt target..."
 	@gofmt -l -w -s $(SRC)
+
+.PHONY: install-npm-check-updates
+install-npm-check-updates:
+	npm install npm-check-updates
+
+.PHONY: update-dependencies
+update-dependencies: install-npm-check-updates
+	ncu -u
+	npm install
