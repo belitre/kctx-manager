@@ -211,8 +211,13 @@ func ListContexts(kubeconfigArg string) error {
 	listContexts := []*ContextWithEndpoint{}
 
 	for k, v := range currentConfig.Contexts {
+		cluster, ok := currentConfig.Clusters[v.Cluster]
+		if !ok {
+			return fmt.Errorf("error while reading endpoint, couldn't find a cluster with name: %s", v.Cluster)
+		}
+
 		ctxWithEndpoint := &ContextWithEndpoint{
-			Endpoint: currentConfig.Clusters[v.Cluster].Server,
+			Endpoint: cluster.Server,
 			Name:     k,
 		}
 		listContexts = append(listContexts, ctxWithEndpoint)
