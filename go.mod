@@ -8,7 +8,7 @@ require (
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v0.0.6
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.0
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/client-go v0.17.4
 	k8s.io/utils v0.0.0-20200229041039-0a110f9eb7ab // indirect
