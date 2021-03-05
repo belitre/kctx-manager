@@ -3,7 +3,7 @@ module github.com/belitre/kctx-manager
 go 1.14
 
 require (
-	github.com/google/go-cmp v0.4.0
+	github.com/google/go-cmp v0.5.5
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
