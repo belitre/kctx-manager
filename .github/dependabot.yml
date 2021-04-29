@@ -1,0 +1,17 @@
+version: 2
+updates:
+- package-ecosystem: gomod
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: k8s.io/client-go
+    versions:
+    - 0.20.2
+    - 0.20.3
+    - 0.20.4
+    - 0.20.5
+  - dependency-name: github.com/google/go-cmp
+    versions:
+    - 0.5.4
