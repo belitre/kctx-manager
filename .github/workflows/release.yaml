@@ -11,11 +11,31 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GOLANG_VERSION: "1.19.5"
+      NODE_VERSION: 16
     steps:
       - name: checkout
-        uses: actions/checkout@v2.0.0
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: actions/cache@v3
+        id: node-cache
+        with:
+          path: node_modules
+          key: semantic-release-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Dependencies
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
       - name: release
         id: release
-        uses: ouzi-dev/go-make-action@v1.4.0
-        with:
-          target: semantic-release
+        run: make semantic-release
