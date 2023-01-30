@@ -8,15 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GOLANG_VERSION: "1.19.5"
     steps:
-      - uses: ouzi-dev/commit-status-updater@v1.0.3
       - name: checkout
-        uses: actions/checkout@v2.0.0
+        uses: actions/checkout@@v3
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+
       - name: build and test
-        uses: ouzi-dev/go-make-action@v1.4.0
-        with:
-          target: "build-cross"
-      - if: always()
-        uses: ouzi-dev/commit-status-updater@v1.0.3
-        with:
-          status: "${{ job.status }}"
+        run: make build-cross

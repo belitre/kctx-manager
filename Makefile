@@ -53,7 +53,7 @@ build: bootstrap info tidy fmt
 # usage: make clean build-cross dist VERSION=v0.2-alpha
 .PHONY: build-cross
 build-cross: LDFLAGS += -extldflags "-static"
-build-cross: bootstrap info tidy fmt lint
+build-cross: bootstrap info tidy fmt
 	CGO_ENABLED=0 gox -parallel=3 -output="_dist/{{.OS}}-{{.Arch}}/{{.Dir}}" -osarch='$(TARGETS)' -ldflags '$(LDFLAGS)' $(BUILD_PATH)
 
 .PHONY: dist
