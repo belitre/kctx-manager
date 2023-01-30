@@ -113,7 +113,8 @@ endif
 .PHONY: bootstrap
 bootstrap: 
 ifndef HAS_GOX
-	go get -u github.com/mitchellh/gox
+	@go get -u github.com/mitchellh/gox@v1.0.1
+	@go install github.com/mitchellh/gox
 endif
 ifndef HAS_GIT
 	$(error You must install Git)
