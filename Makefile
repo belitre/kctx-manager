@@ -4,7 +4,7 @@ LDFLAGS   := -w -s
 TESTS     := ./...
 TESTFLAGS :=
 
-TARGETS   ?= darwin/amd64 linux/amd64 windows/amd64
+TARGETS   ?= darwin/arm64 darwin/amd64 linux/amd64 windows/amd64
 DIST_DIRS = find * -type d -exec
 
 SHELL = /bin/bash
