@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GOLANG_VERSION: "1.19.5"
+      GOLANG_VERSION: "1.24.4"
       NODE_VERSION: 16
     steps:
       - name: checkout
